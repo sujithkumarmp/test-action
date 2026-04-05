@@ -8,6 +8,11 @@ on:
         required: true
         default: Main
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   run-java:
     runs-on: ubuntu-latest
@@ -43,3 +48,24 @@ jobs:
           name: analysis-report
           path: analysis-report.html
           if-no-files-found: error
+
+      - name: Prepare Pages site
+        run: |
+          mkdir -p site
+          cp analysis-report.html site/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy-pages:
+    needs: run-java
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
