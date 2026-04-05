@@ -1,0 +1,37 @@
+name: Run Java Class
+
+on:
+  workflow_dispatch:
+    inputs:
+      main_class:
+        description: Fully qualified Java main class name (for example, com.example.Main or Main)
+        required: true
+        default: Main
+
+jobs:
+  run-java:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Compile Java sources
+        run: |
+          mkdir -p out
+          if find src -type f -name "*.java" | grep -q .; then
+            find src -type f -name "*.java" > sources.txt
+            javac -d out @sources.txt
+          else
+            echo "No Java source files found in src (*.java)."
+            exit 1
+          fi
+
+      - name: Run selected class
+        run: java -cp out "${{ github.event.inputs.main_class }}"
