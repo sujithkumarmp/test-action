@@ -35,3 +35,11 @@ jobs:
 
       - name: Run selected class
         run: java -cp out "${{ github.event.inputs.main_class }}"
+
+      - name: Upload HTML report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-report
+          path: analysis-report.html
+          if-no-files-found: error
